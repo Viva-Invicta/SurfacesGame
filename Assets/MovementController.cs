@@ -35,12 +35,12 @@ namespace SurfacesGame
             this.surfaceProgressData = surfaceProgressData;
         }
 
-        public void UpdateMovement(float horizontalInput, bool jumpPressed, float deltaTime)
+        public void UpdateMovement(InputData inputData, float deltaTime)
         {
             isGrounded = CheckIsGrounded();
 
-            owner.position = CalculateAndApplyVelocity(owner.position, jumpPressed, deltaTime);
-            owner.position = CalculateAndApplyHorizontalMomement(owner.position, horizontalInput, deltaTime);
+            owner.position = CalculateAndApplyVelocity(owner.position, inputData.JumpPressed, deltaTime);
+            owner.position = CalculateAndApplyHorizontalMomement(owner.position, inputData.HorizontalInput, deltaTime);
             owner.rotation = CalculateAndApplyRotation(owner.rotation, deltaTime);
         }
 
@@ -95,4 +95,9 @@ namespace SurfacesGame
         }
     }
 
+    public struct InputData
+    {
+        public float HorizontalInput;
+        public bool JumpPressed;
+    }
 }

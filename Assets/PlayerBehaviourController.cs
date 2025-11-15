@@ -50,7 +50,7 @@ namespace SurfacesGame
             }
 
             platformNavigator.UpdateNavigation(transform.position);
-            movementController.UpdateMovement(input.HorizontalMovement, input.JumpPressed, Time.deltaTime);
+            movementController.UpdateMovement(input.Data, Time.deltaTime);
         }
 
         private void OnDestroy()
