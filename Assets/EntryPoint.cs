@@ -1,0 +1,31 @@
+using UnityEngine;
+
+namespace SurfacesGame
+{
+    public class EntryPoint : MonoBehaviour
+    {
+        [SerializeField]
+        private PlayerBehaviourController playerController;
+
+        [SerializeField]
+        private Platform platform;
+
+        private void OnEnable()
+        {
+            platform.Initialize();
+            playerController.Initialize(new KeyboardInput(), platform);
+        }
+    }
+
+    public class KeyboardInput : IInput
+    {
+        public float HorizontalMovement => Input.GetAxisRaw("Horizontal");
+
+        public bool JumpPressed => Input.GetKey(KeyCode.Space);
+
+        public void Refresh()
+        {
+            throw new System.NotImplementedException();
+        }
+    }
+}
