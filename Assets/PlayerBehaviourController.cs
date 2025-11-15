@@ -12,7 +12,7 @@ namespace SurfacesGame
 
         private IInput input;
 
-        private MovementController movementController;
+        private MovementCalculator movementController;
         private PlatformNavigator platformNavigator;
 
         private bool isInitialized;
@@ -32,7 +32,7 @@ namespace SurfacesGame
             this.input = input;
 
             platformNavigator = new PlatformNavigator(platform, size);
-            movementController = new MovementController(movementSettings, transform, size);
+            movementController = new MovementCalculator(movementSettings, size);
 
             platformNavigator.SurfaceDataUpdated += HandleSurfaceDataUpdated;
             platformNavigator.SurfaceProgressDataUpdated += HandleSurfaceProgressDataUpdated;
@@ -49,8 +49,15 @@ namespace SurfacesGame
                 return;
             }
 
-            platformNavigator.UpdateNavigation(transform.position);
-            movementController.UpdateMovement(input.Data, Time.deltaTime);
+            var position = transform.position;
+            var rotation = transform.rotation;
+
+            platformNavigator.UpdateNavigation(position);
+
+            var (newPosition, newRotation) = movementController.CalculateMovement(position, rotation, input.Data, Time.deltaTime);
+
+            transform.position = newPosition;
+            transform.rotation = newRotation;
         }
 
         private void OnDestroy()

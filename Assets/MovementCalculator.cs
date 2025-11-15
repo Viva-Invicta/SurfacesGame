@@ -3,10 +3,9 @@ using UnityEngine.UI;
 
 namespace SurfacesGame
 {
-    public class MovementController
+    public class MovementCalculator
     {
         private readonly MovementSettings settings;
-        private readonly Transform owner;
         private readonly Vector2 ownerSize;
 
         private float verticalVelocity;
@@ -15,13 +14,11 @@ namespace SurfacesGame
         private SurfaceData surfaceData;
         private SurfaceProgressData surfaceProgressData;
 
-        public MovementController(
+        public MovementCalculator(
             MovementSettings settings,
-            Transform owner,
             Vector2 ownerSize)
         {
             this.settings = settings;
-            this.owner = owner;
             this.ownerSize = ownerSize;
         }
 
@@ -35,13 +32,18 @@ namespace SurfacesGame
             this.surfaceProgressData = surfaceProgressData;
         }
 
-        public void UpdateMovement(InputData inputData, float deltaTime)
+        public (Vector2 newPosition, Quaternion newRotation) CalculateMovement(Vector2 oldPosition, Quaternion oldRotation, InputData inputData, float deltaTime)
         {
             isGrounded = CheckIsGrounded();
 
-            owner.position = CalculateAndApplyVelocity(owner.position, inputData.JumpPressed, deltaTime);
-            owner.position = CalculateAndApplyHorizontalMomement(owner.position, inputData.HorizontalInput, deltaTime);
-            owner.rotation = CalculateAndApplyRotation(owner.rotation, deltaTime);
+            Vector2 newPosition;
+            Quaternion newRotation;
+
+            newPosition = CalculateAndApplyVelocity(oldPosition, inputData.JumpPressed, deltaTime);
+            newPosition = CalculateAndApplyHorizontalMomement(newPosition, inputData.HorizontalInput, deltaTime);
+            newRotation = CalculateAndApplyRotation(oldRotation, deltaTime);
+
+            return (newPosition, newRotation);
         }
 
         private Vector2 CalculateAndApplyVelocity(Vector2 oldPosition, bool jumpPressed, float deltaTime)
