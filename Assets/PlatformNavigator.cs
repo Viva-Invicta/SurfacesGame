@@ -6,99 +6,109 @@ namespace SurfacesGame
     public class PlatformNavigator
     {
         public event Action SurfaceDataUpdated;
+        public event Action SurfaceProgressDataUpdated;
 
         private readonly Platform platform;
         private readonly Vector2 ownerSize;
 
-        public PlatformSide CurrentSide { get; private set; }
-        public float SideProgress { get; private set; }
-        public SurfaceData SurfaceData { get; private set; }
+        private PlatformSurface currentSurface;
 
-        public Vector2 ActiveSideNormal => CurrentSide.Data.Normal;
-        public Vector2 ActiveSideDirection => CurrentSide.Data.Direction;
+        public SurfaceData SurfaceData { get; private set; }
+        public SurfaceProgressData SurfaceProgressData { get; private set; }
 
         public PlatformNavigator(Platform platform, Vector2 ownerSize)
         {
             this.platform = platform;
             this.ownerSize = ownerSize;
 
-            CurrentSide = platform.Sides[0];
-            SideProgress = 0.5f;
+            currentSurface = platform.Surfaces[0];
+
+            SurfaceData = currentSurface.Data;
+            SurfaceProgressData = new SurfaceProgressData { Progress = 0.5f };
         }
 
         public void UpdateNavigation(Vector2 ownerPosition)
         {
-            SideProgress = CalculateSideProgress(CurrentSide, ownerPosition);
-            ChangeSideIfNecessary(ownerPosition);
+            ChangeActiveSurfaceIfNecessary(ownerPosition);
+            RecalculateActiveSurfaceProgress(ownerPosition);
         }
 
-        public Vector2 GetSnapPosition(float addedVerticalDistance)
+        public Vector2 GetSnapPosition()
         {
-            var position = Vector2.Lerp(CurrentSide.Data.Start, CurrentSide.Data.End, SideProgress);
-            return position + CurrentSide.Data.Normal * (ownerSize.y * 0.5f + addedVerticalDistance);
+            var position = Vector2.Lerp(currentSurface.Data.Start, currentSurface.Data.End, SurfaceProgressData.Progress);
+            return position + currentSurface.Data.Normal * (ownerSize.y * 0.5f);
         }
 
         public float DistanceToSide(Vector2 ownerPosition)
         {
-            var invertedNormal = -CurrentSide.Data.Normal;
-
-            var pointOnSide = Vector2.Lerp(CurrentSide.Data.Start, CurrentSide.Data.End, SideProgress);
+            var invertedNormal = -currentSurface.Data.Normal;
+            var pointOnSide = Vector2.Lerp(currentSurface.Data.Start, currentSurface.Data.End, SurfaceProgressData.Progress);
             var ownerBottom = ownerPosition + invertedNormal * (ownerSize.y * 0.5f);
-
             var ownerToPoint = ownerBottom - pointOnSide;
-
             return Vector2.Dot(ownerToPoint, invertedNormal);
         }
 
-        //[0..1]
-        private float CalculateSideProgress(PlatformSide side, Vector2 ownerPosition)
+        public void RecalculateActiveSurfaceProgress(Vector2 ownerPosition)
         {
-            var toPlayer = ownerPosition - side.Data.Start;
-            var projection = Vector2.Dot(toPlayer, side.Data.Direction);
-            var length = Vector2.Distance(side.Data.Start, side.Data.End);
+            SurfaceProgressData = new SurfaceProgressData
+            {
+                Progress = CalculateSurfaceProgress(currentSurface, ownerPosition),
+                Distance = DistanceToSide(ownerPosition)
+            };
+
+            SurfaceProgressDataUpdated?.Invoke();
+        }
+
+        private float CalculateSurfaceProgress(PlatformSurface surface, Vector2 ownerPosition)
+        {
+            var toPlayer = ownerPosition - surface.Data.Start;
+            var projection = Vector2.Dot(toPlayer, surface.Data.Direction);
+            var length = Vector2.Distance(surface.Data.Start, surface.Data.End);
 
             return projection / length;
         }
 
-        private void ChangeSideIfNecessary(Vector2 ownerPosition)
+        private void ChangeActiveSurfaceIfNecessary(Vector2 ownerPosition)
         {
-            var bestSide = CurrentSide;
-            var bestProgress = SideProgress;
-            var bestDistance = DistanceToOwner(bestSide, bestProgress, ownerPosition);
+            var bestSurface = currentSurface;
+            var bestProgress = SurfaceProgressData.Progress;
+            var bestDistance = DistanceToOwner(bestSurface, bestProgress, ownerPosition);
 
-            int[] neighbors = { CurrentSide.NextIndex, CurrentSide.PrevIndex };
+            int[] neighbors = { currentSurface.NextIndex, currentSurface.PrevIndex };
 
             foreach (var i in neighbors)
             {
-                var side = platform.Sides[i];
-                var progress = CalculateSideProgress(side, ownerPosition);
+                var surface = platform.Surfaces[i];
+                var progress = CalculateSurfaceProgress(surface, ownerPosition);
 
                 if (progress < 0f || progress > 1f)
                 {
                     continue;
                 }
 
-                var dist = DistanceToOwner(side, progress, ownerPosition);
+                var dist = DistanceToOwner(surface, progress, ownerPosition);
 
                 if (dist < bestDistance)
                 {
-                    bestSide = side;
+                    bestSurface = surface;
                     bestProgress = progress;
                     bestDistance = dist;
                 }
             }
 
-            CurrentSide = bestSide;
-            SideProgress = bestProgress;
-            SurfaceData = CurrentSide.Data;
+            currentSurface = bestSurface;
 
+            RecalculateActiveSurfaceProgress(ownerPosition);
+
+            SurfaceData = currentSurface.Data;
             SurfaceDataUpdated?.Invoke();
         }
 
-        private float DistanceToOwner(PlatformSide side, float progress, Vector2 ownerPosition)
+        private float DistanceToOwner(PlatformSurface surface, float progress, Vector2 ownerPosition)
         {
-            var p = Vector2.Lerp(side.Data.Start, side.Data.End, Mathf.Clamp01(progress));
+            var p = Vector2.Lerp(surface.Data.Start, surface.Data.End, Mathf.Clamp01(progress));
             return Vector2.Distance(p, ownerPosition);
         }
     }
+
 }

@@ -244,7 +244,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerController: {fileID: 1416607078}
-  platform: {fileID: 1141815339}
+  platform: {fileID: 754460125}
 --- !u!4 &753755456
 Transform:
   m_ObjectHideFlags: 0
@@ -277,7 +277,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &754460125
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -473,7 +473,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1141815339
 MonoBehaviour:
   m_ObjectHideFlags: 0

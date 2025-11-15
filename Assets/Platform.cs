@@ -7,9 +7,9 @@ namespace SurfacesGame
         [SerializeField]
         private Vector2[] vertices;
 
-        private PlatformSide[] sides;
+        private PlatformSurface[] surfaces;
 
-        public PlatformSide[] Sides => sides;
+        public PlatformSurface[] Surfaces => surfaces;
         public Vector2[] Vertices => vertices;
 
         public void Initialize()
@@ -26,7 +26,7 @@ namespace SurfacesGame
         private void CreateSides()
         {
             var count = vertices.Length;
-            sides = new PlatformSide[count];
+            surfaces = new PlatformSurface[count];
 
             for (var i = 0; i < count; i++)
             {
@@ -41,10 +41,10 @@ namespace SurfacesGame
                     Length = Vector2.Distance(start, end)
                 };
 
-                var side = new PlatformSide(data);
-                side.SetIndices(prevIndex, nextIndex);
+                var surface = new PlatformSurface(data);
+                surface.SetIndices(prevIndex, nextIndex);
 
-                sides[i] = side;
+                surfaces[i] = surface;
             }
         }
 
@@ -78,36 +78,5 @@ namespace SurfacesGame
                 Gizmos.DrawLine(start, end);
             }
         }
-    }
-
-    [System.Serializable]
-    public struct PlatformSide
-    {
-        public SurfaceData Data;
-
-        public int NextIndex;
-        public int PrevIndex;
-
-        public PlatformSide(SurfaceData data)
-        {
-            Data = data;
-            NextIndex = -1;
-            PrevIndex = -1;
-        }
-
-        public void SetIndices(int prevIndex, int nextIndex)
-        {
-            PrevIndex = prevIndex;
-            NextIndex = nextIndex;
-        }
-    }
-
-    public struct SurfaceData
-    {
-        public Vector2 Start;
-        public Vector2 End;
-        public Vector2 Direction;
-        public Vector2 Normal;
-        public float Length;
     }
 }

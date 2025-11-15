@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 
 namespace SurfacesGame
 {
@@ -6,28 +7,32 @@ namespace SurfacesGame
     {
         private readonly MovementSettings settings;
         private readonly Transform owner;
-        private readonly PlatformNavigator platformNavigator;
         private readonly Vector2 ownerSize;
 
         private float verticalVelocity;
-        private float addedVerticalDistance;
-
         private bool isGrounded;
-        private SurfaceData surfaceData;
 
-        public MovementController(MovementSettings settings, Transform owner, PlatformNavigator navigator, Vector2 ownerSize)
+        private SurfaceData surfaceData;
+        private SurfaceProgressData surfaceProgressData;
+
+        public MovementController(
+            MovementSettings settings,
+            Transform owner,
+            Vector2 ownerSize)
         {
             this.settings = settings;
             this.owner = owner;
-            this.platformNavigator = navigator;
             this.ownerSize = ownerSize;
-
-            SnapToSide();
         }
 
         public void SetSurfaceData(SurfaceData surfaceData)
         {
             this.surfaceData = surfaceData;
+        }
+
+        public void SetSurfaceProgressData(SurfaceProgressData surfaceProgressData)
+        {
+            this.surfaceProgressData = surfaceProgressData;
         }
 
         public void UpdateMovement(float horizontalInput, bool jumpPressed, float deltaTime)
@@ -44,13 +49,13 @@ namespace SurfacesGame
             if (!isGrounded)
             {
                 verticalVelocity += settings.GravityForce * deltaTime;
-                return oldPosition + deltaTime * verticalVelocity * surfaceData.Normal;
+                return oldPosition + verticalVelocity * deltaTime * surfaceData.Normal;
             }
 
             if (jumpPressed)
             {
                 verticalVelocity = settings.JumpForce;
-                return oldPosition + deltaTime * verticalVelocity * surfaceData.Normal;
+                return oldPosition + verticalVelocity * deltaTime * surfaceData.Normal;
             }
 
             verticalVelocity = 0;
@@ -59,34 +64,35 @@ namespace SurfacesGame
 
         private Vector2 CalculateAndApplyHorizontalMomement(Vector2 oldPosition, float horizontalInput, float deltaTime)
         {
-            return oldPosition + deltaTime * horizontalInput * settings.MoveSpeed * surfaceData.Direction;
+            return oldPosition + horizontalInput * deltaTime * settings.MoveSpeed * surfaceData.Direction;
         }
 
         private bool CheckIsGrounded()
         {
-            var dist = platformNavigator.DistanceToSide(owner.position);
-            var ownerSizeFraction = (ownerSize.x * 0.5f) / surfaceData.Length;
-
-            if (platformNavigator.SideProgress > 1f + ownerSizeFraction ||
-                platformNavigator.SideProgress < 0f - ownerSizeFraction)
+            if (!IsWithinSurfaceBounds())
             {
                 return false;
             }
 
-            return dist >= 0;
+            return surfaceProgressData.Distance >= 0;
         }
 
         private Quaternion CalculateAndApplyRotation(Quaternion oldRotation, float deltaTime)
         {
-            var activeSideUp = surfaceData.Normal;
-            var targetZAngle = Mathf.Atan2(activeSideUp.y, activeSideUp.x) * Mathf.Rad2Deg - 90f;
-            var targetRotation = Quaternion.Euler(0, 0, targetZAngle);
+            var up = surfaceData.Normal;
+            var targetZ = Mathf.Atan2(up.y, up.x) * Mathf.Rad2Deg - 90f;
+
+            var targetRotation = Quaternion.Euler(0, 0, targetZ);
             return Quaternion.Lerp(oldRotation, targetRotation, settings.RotationSpeed * deltaTime);
         }
 
-        private void SnapToSide()
+        private bool IsWithinSurfaceBounds()
         {
-            owner.position = platformNavigator.GetSnapPosition(addedVerticalDistance);
+            var progress = surfaceProgressData.Progress;
+            var tolerance = (ownerSize.x * 0.5f) / surfaceData.Length;
+
+            return progress >= -tolerance && progress <= 1f + tolerance;
         }
     }
+
 }

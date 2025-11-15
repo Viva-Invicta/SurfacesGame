@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.UIElements;
 
 namespace SurfacesGame
 {
@@ -31,9 +32,12 @@ namespace SurfacesGame
             this.input = input;
 
             platformNavigator = new PlatformNavigator(platform, size);
-            movementController = new MovementController(movementSettings, transform, platformNavigator, size);
+            movementController = new MovementController(movementSettings, transform, size);
 
             platformNavigator.SurfaceDataUpdated += HandleSurfaceDataUpdated;
+            platformNavigator.SurfaceProgressDataUpdated += HandleSurfaceProgressDataUpdated;
+
+            transform.position = platformNavigator.GetSnapPosition();
 
             isInitialized = true;
         }
@@ -52,6 +56,7 @@ namespace SurfacesGame
         private void OnDestroy()
         {
             platformNavigator.SurfaceDataUpdated -= HandleSurfaceDataUpdated;
+            platformNavigator.SurfaceProgressDataUpdated -= HandleSurfaceProgressDataUpdated;
         }
 
         private void HandleSurfaceDataUpdated()
@@ -59,19 +64,15 @@ namespace SurfacesGame
             movementController.SetSurfaceData(platformNavigator.SurfaceData);
         }
 
+        private void HandleSurfaceProgressDataUpdated()
+        {
+            movementController.SetSurfaceProgressData(platformNavigator.SurfaceProgressData);
+        }
+
         private void OnDrawGizmos()
         {
             Gizmos.color = Color.blue;
             Gizmos.DrawWireCube(transform.position, new Vector3(size.x, size.y, 0));
         }
-    }
-
-
-    public interface IInput
-    {
-        public void Refresh();
-
-        public float HorizontalMovement { get; }
-        public bool JumpPressed { get; }
     }
 }
