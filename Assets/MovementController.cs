@@ -13,6 +13,7 @@ namespace SurfacesGame
         private float addedVerticalDistance;
 
         private bool isGrounded;
+        private SurfaceData surfaceData;
 
         public MovementController(MovementSettings settings, Transform owner, PlatformNavigator navigator, Vector2 ownerSize)
         {
@@ -22,6 +23,11 @@ namespace SurfacesGame
             this.ownerSize = ownerSize;
 
             SnapToSide();
+        }
+
+        public void SetSurfaceData(SurfaceData surfaceData)
+        {
+            this.surfaceData = surfaceData;
         }
 
         public void UpdateMovement(float horizontalInput, bool jumpPressed, float deltaTime)
@@ -38,28 +44,28 @@ namespace SurfacesGame
             if (!isGrounded)
             {
                 verticalVelocity += settings.GravityForce * deltaTime;
-                return oldPosition + deltaTime * verticalVelocity * platformNavigator.ActiveSideNormal;
+                return oldPosition + deltaTime * verticalVelocity * surfaceData.Normal;
             }
 
             if (jumpPressed)
             {
                 verticalVelocity = settings.JumpForce;
-                return oldPosition + deltaTime * verticalVelocity * platformNavigator.ActiveSideNormal;
+                return oldPosition + deltaTime * verticalVelocity * surfaceData.Normal;
             }
 
             verticalVelocity = 0;
             return oldPosition;
         }
 
-        private Vector2 CalculateAndApplyHorizontalMomement(Vector2 pos, float horizontalInput, float deltaTime)
+        private Vector2 CalculateAndApplyHorizontalMomement(Vector2 oldPosition, float horizontalInput, float deltaTime)
         {
-            return pos + platformNavigator.ActiveSideDirection * settings.MoveSpeed * horizontalInput * deltaTime;
+            return oldPosition + deltaTime * horizontalInput * settings.MoveSpeed * surfaceData.Direction;
         }
 
         private bool CheckIsGrounded()
         {
             var dist = platformNavigator.DistanceToSide(owner.position);
-            var ownerSizeFraction = (ownerSize.x * 0.5f) / platformNavigator.CurrentSide.Data.Length;
+            var ownerSizeFraction = (ownerSize.x * 0.5f) / surfaceData.Length;
 
             if (platformNavigator.SideProgress > 1f + ownerSizeFraction ||
                 platformNavigator.SideProgress < 0f - ownerSizeFraction)
@@ -72,7 +78,7 @@ namespace SurfacesGame
 
         private Quaternion CalculateAndApplyRotation(Quaternion oldRotation, float deltaTime)
         {
-            var activeSideUp = platformNavigator.ActiveSideNormal;
+            var activeSideUp = surfaceData.Normal;
             var targetZAngle = Mathf.Atan2(activeSideUp.y, activeSideUp.x) * Mathf.Rad2Deg - 90f;
             var targetRotation = Quaternion.Euler(0, 0, targetZAngle);
             return Quaternion.Lerp(oldRotation, targetRotation, settings.RotationSpeed * deltaTime);

@@ -1,14 +1,18 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 namespace SurfacesGame
 {
     public class PlatformNavigator
     {
+        public event Action SurfaceDataUpdated;
+
         private readonly Platform platform;
         private readonly Vector2 ownerSize;
 
         public PlatformSide CurrentSide { get; private set; }
         public float SideProgress { get; private set; }
+        public SurfaceData SurfaceData { get; private set; }
 
         public Vector2 ActiveSideNormal => CurrentSide.Data.Normal;
         public Vector2 ActiveSideDirection => CurrentSide.Data.Direction;
@@ -86,6 +90,9 @@ namespace SurfacesGame
 
             CurrentSide = bestSide;
             SideProgress = bestProgress;
+            SurfaceData = CurrentSide.Data;
+
+            SurfaceDataUpdated?.Invoke();
         }
 
         private float DistanceToOwner(PlatformSide side, float progress, Vector2 ownerPosition)

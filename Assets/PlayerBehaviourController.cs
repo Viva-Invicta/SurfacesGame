@@ -33,10 +33,12 @@ namespace SurfacesGame
             platformNavigator = new PlatformNavigator(platform, size);
             movementController = new MovementController(movementSettings, transform, platformNavigator, size);
 
+            platformNavigator.SurfaceDataUpdated += HandleSurfaceDataUpdated;
+
             isInitialized = true;
         }
 
-        public void Update()
+        private void Update()
         {
             if (!isInitialized)
             {
@@ -45,6 +47,16 @@ namespace SurfacesGame
 
             platformNavigator.UpdateNavigation(transform.position);
             movementController.UpdateMovement(input.HorizontalMovement, input.JumpPressed, Time.deltaTime);
+        }
+
+        private void OnDestroy()
+        {
+            platformNavigator.SurfaceDataUpdated -= HandleSurfaceDataUpdated;
+        }
+
+        private void HandleSurfaceDataUpdated()
+        {
+            movementController.SetSurfaceData(platformNavigator.SurfaceData);
         }
 
         private void OnDrawGizmos()
