@@ -10,10 +10,8 @@ namespace SurfacesGame
         public PlatformSide CurrentSide { get; private set; }
         public float SideProgress { get; private set; }
 
-
-
-        public Vector2 ActiveSideNormal => CurrentSide.Normal;
-        public Vector2 ActiveSideDirection => CurrentSide.Direction;
+        public Vector2 ActiveSideNormal => CurrentSide.Data.Normal;
+        public Vector2 ActiveSideDirection => CurrentSide.Data.Direction;
 
         public PlatformNavigator(Platform platform, Vector2 ownerSize)
         {
@@ -32,15 +30,15 @@ namespace SurfacesGame
 
         public Vector2 GetSnapPosition(float addedVerticalDistance)
         {
-            var position = Vector2.Lerp(CurrentSide.Start, CurrentSide.End, SideProgress);
-            return position + CurrentSide.Normal * (ownerSize.y * 0.5f + addedVerticalDistance);
+            var position = Vector2.Lerp(CurrentSide.Data.Start, CurrentSide.Data.End, SideProgress);
+            return position + CurrentSide.Data.Normal * (ownerSize.y * 0.5f + addedVerticalDistance);
         }
 
         public float DistanceToSide(Vector2 ownerPosition)
         {
-            var invertedNormal = -CurrentSide.Normal;
+            var invertedNormal = -CurrentSide.Data.Normal;
 
-            var pointOnSide = Vector2.Lerp(CurrentSide.Start, CurrentSide.End, SideProgress);
+            var pointOnSide = Vector2.Lerp(CurrentSide.Data.Start, CurrentSide.Data.End, SideProgress);
             var ownerBottom = ownerPosition + invertedNormal * (ownerSize.y * 0.5f);
 
             var ownerToPoint = ownerBottom - pointOnSide;
@@ -51,9 +49,9 @@ namespace SurfacesGame
         //[0..1]
         private float CalculateSideProgress(PlatformSide side, Vector2 ownerPosition)
         {
-            var toPlayer = ownerPosition - side.Start;
-            var projection = Vector2.Dot(toPlayer, side.Direction);
-            var length = Vector2.Distance(side.Start, side.End);
+            var toPlayer = ownerPosition - side.Data.Start;
+            var projection = Vector2.Dot(toPlayer, side.Data.Direction);
+            var length = Vector2.Distance(side.Data.Start, side.Data.End);
 
             return projection / length;
         }
@@ -92,7 +90,7 @@ namespace SurfacesGame
 
         private float DistanceToOwner(PlatformSide side, float progress, Vector2 ownerPosition)
         {
-            var p = Vector2.Lerp(side.Start, side.End, Mathf.Clamp01(progress));
+            var p = Vector2.Lerp(side.Data.Start, side.Data.End, Mathf.Clamp01(progress));
             return Vector2.Distance(p, ownerPosition);
         }
     }

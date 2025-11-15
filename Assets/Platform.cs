@@ -31,8 +31,19 @@ namespace SurfacesGame
             for (var i = 0; i < count; i++)
             {
                 var (start, end, direction, normal, prevIndex, nextIndex) = GetSideData(i);
-                var side = new PlatformSide(start, end, direction, normal);
+
+                var data = new SurfaceData
+                {
+                    Start = start,
+                    End = end,
+                    Direction = direction,
+                    Normal = normal,
+                    Length = Vector2.Distance(start, end)
+                };
+
+                var side = new PlatformSide(data);
                 side.SetIndices(prevIndex, nextIndex);
+
                 sides[i] = side;
             }
         }
@@ -72,39 +83,31 @@ namespace SurfacesGame
     [System.Serializable]
     public struct PlatformSide
     {
-        public PlatformSide(Vector2 start, Vector2 end, Vector2 direction, Vector2 normal) : this()
+        public SurfaceData Data;
+
+        public int NextIndex;
+        public int PrevIndex;
+
+        public PlatformSide(SurfaceData data)
         {
-            this.start = start;
-            this.end = end;
-            this.direction = direction;
-            this.normal = normal;
-
-            length = Vector2.Distance(start, end);
+            Data = data;
+            NextIndex = -1;
+            PrevIndex = -1;
         }
-
-        private readonly Vector2 start;
-        private readonly Vector2 end;
-        private readonly Vector2 direction;
-        private readonly Vector2 normal;
-        private readonly float length;
-
-        private int nextIndex;
-        private int prevIndex;
-
-        public Vector2 Start => start;
-        public Vector2 End => end;
-        public Vector2 Direction => direction;
-        public Vector2 Normal => normal;
-        public float Length => length;
-
-        public int NextIndex => nextIndex;
-        public int PrevIndex => prevIndex;
 
         public void SetIndices(int prevIndex, int nextIndex)
         {
-            this.nextIndex = nextIndex;
-            this.prevIndex = prevIndex;
+            PrevIndex = prevIndex;
+            NextIndex = nextIndex;
         }
     }
 
+    public struct SurfaceData
+    {
+        public Vector2 Start;
+        public Vector2 End;
+        public Vector2 Direction;
+        public Vector2 Normal;
+        public float Length;
+    }
 }

@@ -59,7 +59,7 @@ namespace SurfacesGame
         private bool CheckIsGrounded()
         {
             var dist = platformNavigator.DistanceToSide(owner.position);
-            var ownerSizeFraction = (ownerSize.x * 0.5f) / platformNavigator.CurrentSide.Length;
+            var ownerSizeFraction = (ownerSize.x * 0.5f) / platformNavigator.CurrentSide.Data.Length;
 
             if (platformNavigator.SideProgress > 1f + ownerSizeFraction ||
                 platformNavigator.SideProgress < 0f - ownerSizeFraction)
