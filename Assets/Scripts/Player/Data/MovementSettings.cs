@@ -9,7 +9,6 @@ namespace SurfacesGame
         [SerializeField] private float moveSpeed;
         [SerializeField] private float jumpForce;
         [SerializeField] private float gravityForce;
-        [SerializeField] private float verticalOffset;
         [SerializeField] private float rotationSpeed;
 
         public float MoveSpeed => moveSpeed;

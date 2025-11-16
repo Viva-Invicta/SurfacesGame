@@ -1,7 +1,7 @@
 ﻿namespace SurfacesGame
 {
     [System.Serializable]
-    public struct PlatformSurface
+    public class PlatformSurface
     {
         public SurfaceData Data;
 
