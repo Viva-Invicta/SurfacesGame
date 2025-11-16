@@ -10,10 +10,25 @@ namespace SurfacesGame
         [SerializeField]
         private Platform platform;
 
+        [SerializeField]
+        private InputInitializationData inputInitializationData;
+
+        private IInput input;
+
         private void OnEnable()
         {
+            input = new InputFactory(inputInitializationData).Create();
+
             platform.Initialize();
-            playerController.Initialize(new KeyboardInput(), platform);
+            playerController.Initialize(input, platform);
+        }
+
+        private void Update()
+        {
+            if (input != default)
+            {
+                input.Refresh();
+            }
         }
     }
 }

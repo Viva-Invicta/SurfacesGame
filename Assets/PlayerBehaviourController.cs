@@ -1,7 +1,4 @@
-﻿using System.Linq;
-using UnityEngine;
-using UnityEngine.UI;
-using UnityEngine.UIElements;
+﻿using UnityEngine;
 
 namespace SurfacesGame
 {
@@ -11,6 +8,7 @@ namespace SurfacesGame
         [SerializeField] private Vector2 size;
 
         private IInput input;
+        private InputData inputData;
 
         private MovementCalculator movementController;
         private PlatformNavigator platformNavigator;
@@ -31,6 +29,8 @@ namespace SurfacesGame
 
             this.input = input;
 
+            input.InputDataUpdated += HandleInputDataUpdated;
+
             platformNavigator = new PlatformNavigator(platform, size);
             movementController = new MovementCalculator(movementSettings, size);
 
@@ -40,6 +40,16 @@ namespace SurfacesGame
             transform.position = platformNavigator.GetSnapPosition();
 
             isInitialized = true;
+        }
+
+        public void Release()
+        {
+            platformNavigator.SurfaceDataUpdated -= HandleSurfaceDataUpdated;
+            platformNavigator.SurfaceProgressDataUpdated -= HandleSurfaceProgressDataUpdated;
+
+            input.InputDataUpdated -= HandleInputDataUpdated;
+
+            isInitialized = false;
         }
 
         private void Update()
@@ -54,16 +64,12 @@ namespace SurfacesGame
 
             platformNavigator.UpdateNavigation(position);
 
-            var (newPosition, newRotation) = movementController.CalculateMovement(position, rotation, input.Data, Time.deltaTime);
-
-            transform.position = newPosition;
-            transform.rotation = newRotation;
+            (transform.position, transform.rotation) = movementController.CalculateMovement(position, rotation, inputData, Time.deltaTime);
         }
 
         private void OnDestroy()
         {
-            platformNavigator.SurfaceDataUpdated -= HandleSurfaceDataUpdated;
-            platformNavigator.SurfaceProgressDataUpdated -= HandleSurfaceProgressDataUpdated;
+            Release();
         }
 
         private void HandleSurfaceDataUpdated()
@@ -74,6 +80,11 @@ namespace SurfacesGame
         private void HandleSurfaceProgressDataUpdated()
         {
             movementController.SetSurfaceProgressData(platformNavigator.SurfaceProgressData);
+        }
+
+        private void HandleInputDataUpdated()
+        {
+            inputData = input.Data;
         }
 
         private void OnDrawGizmos()
