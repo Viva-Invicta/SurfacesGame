@@ -39,7 +39,7 @@ namespace SurfacesGame
             return position + currentSurface.Data.Normal * (ownerSize.y * 0.5f);
         }
 
-        public float DistanceToSide(Vector2 ownerPosition)
+        private float DistanceToSide(Vector2 ownerPosition)
         {
             var invertedNormal = -currentSurface.Data.Normal;
             var pointOnSide = Vector2.Lerp(currentSurface.Data.Start, currentSurface.Data.End, SurfaceProgressData.Progress);
@@ -48,7 +48,7 @@ namespace SurfacesGame
             return Vector2.Dot(ownerToPoint, invertedNormal);
         }
 
-        public void RecalculateActiveSurfaceProgress(Vector2 ownerPosition)
+        private void RecalculateActiveSurfaceProgress(Vector2 ownerPosition)
         {
             SurfaceProgressData = new SurfaceProgressData
             {
