@@ -1,9 +1,5 @@
-using SurfacesGame;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
-using static UnityEngine.GraphicsBuffer;
 
 namespace SurfacesGame
 {
@@ -15,7 +11,9 @@ namespace SurfacesGame
             var platform = (Platform)target;
 
             if (platform.Vertices == null || platform.Vertices.Length == 0)
+            {
                 return;
+            }
 
             Undo.RecordObject(platform, "Move Platform Vertex");
 
