@@ -30,15 +30,22 @@ namespace SurfacesGame
 
             for (var i = 0; i < count; i++)
             {
-                var (start, end, direction, normal, prevIndex, nextIndex) = GetSideData(i);
+                var (startLocal, endLocal, normalLocal, prevIndex, nextIndex)
+                    = GetSideData(i);
+
+                var startWorld = transform.TransformPoint(startLocal);
+                var endWorld = transform.TransformPoint(endLocal);
+
+                Vector2 dirWorld = (endWorld - startWorld).normalized;
+                Vector2 normalWorld = transform.TransformDirection(new Vector3(normalLocal.x, normalLocal.y, 0f));
 
                 var data = new SurfaceData
                 {
-                    Start = start,
-                    End = end,
-                    Direction = direction,
-                    Normal = normal,
-                    Length = Vector2.Distance(start, end)
+                    Start = startWorld,
+                    End = endWorld,
+                    Direction = dirWorld,
+                    Normal = normalWorld,
+                    Length = Vector2.Distance(startWorld, endWorld)
                 };
 
                 var surface = new PlatformSurface(data);
@@ -48,7 +55,9 @@ namespace SurfacesGame
             }
         }
 
-        private (Vector2 start, Vector2 end, Vector2 direction, Vector2 normal, int prevIndex, int nextIndex) GetSideData(int index)
+
+        private (Vector2 start, Vector2 end, Vector2 normal, int prevIndex, int nextIndex)
+            GetSideData(int index)
         {
             var count = vertices.Length;
             var current = vertices[index];
@@ -57,10 +66,11 @@ namespace SurfacesGame
             var next = vertices[nextIndex];
 
             var direction = (next - current).normalized;
-            var normal = new Vector2(-direction.y, direction.x); // counter-clockwise normal
+            var normal = new Vector2(-direction.y, direction.x);
 
-            return (current, next, direction, normal, prevIndex, nextIndex);
+            return (current, next, normal, prevIndex, nextIndex);
         }
+
 
         private void OnDrawGizmos()
         {
@@ -69,13 +79,23 @@ namespace SurfacesGame
                 return;
             }
 
+            Gizmos.matrix = transform.localToWorldMatrix;
+
             Gizmos.color = Color.yellow;
 
             for (var i = 0; i < vertices.Length; i++)
             {
-                var (start, end, _, _, _, _) = GetSideData(i);
+                var (start, end, normal, _, _) = GetSideData(i);
+
                 Gizmos.DrawSphere(start, 0.1f);
                 Gizmos.DrawLine(start, end);
+
+                var mid = (start + end) * 0.5f;
+                var normalLength = 1f;
+
+                Gizmos.color = Color.red;
+                Gizmos.DrawLine(mid, mid + normal.normalized * normalLength);
+                Gizmos.color = Color.yellow;
             }
         }
     }
