@@ -96,10 +96,4 @@ namespace SurfacesGame
             return progress >= -tolerance && progress <= 1f + tolerance;
         }
     }
-
-    public struct InputData
-    {
-        public float HorizontalInput;
-        public bool JumpPressed;
-    }
 }
