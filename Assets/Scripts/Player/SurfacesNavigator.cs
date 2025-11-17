@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace SurfacesGame
 {
-    public class PlatformNavigator
+    public class SurfacesNavigator
     {
         public event Action SurfaceDataUpdated;
         public event Action SurfaceProgressDataUpdated;
@@ -16,7 +16,7 @@ namespace SurfacesGame
         public SurfaceData SurfaceData { get; private set; }
         public SurfaceProgressData SurfaceProgressData { get; private set; }
 
-        public PlatformNavigator(Platform platform, Vector2 ownerSize)
+        public SurfacesNavigator(Platform platform, Vector2 ownerSize)
         {
             this.platform = platform;
             this.ownerSize = ownerSize;
